@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>个人旅行足迹图 | My Travel Log</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- 引入地图行业标准库 -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 隐藏地图上的杂乱信息，让简历更有高级感 */
+        .leaflet-control-attribution { display: none !important; }
+        .leaflet-container { background: #0b0b0b !important; }
+        /* 定制简历风弹出框 */
+        .custom-popup .leaflet-popup-content-wrapper {
+            background: #18181b; color: #fff; border-radius: 8px; padding: 5px;
+        }
+        .custom-popup .leaflet-popup-tip { background: #18181b; }
+        /* 坐标点光晕特效 */
+        .marker-pin {
+            width: 12px; height: 12px; border-radius: 50%;
+            background: #6366f1; border: 2px solid white;
+            box-shadow: 0 0 10px #6366f1;
+        }
+    </style>
+</head>
+<body class="bg-[#0b0b0b] text-white overflow-hidden">
+
+    <!-- 顶栏：增加简历仪式感 -->
+    <nav class="fixed top-0 left-0 w-full z-50 bg-black/40 backdrop-blur-md border-b border-white/10 px-6 py-4 flex justify-between items-center">
+        <h1 class="text-sm tracking-[0.3em] font-light uppercase">Personal Voyage Map</h1>
+        <div class="text-[10px] text-zinc-500 uppercase tracking-widest">Update: May 2026</div>
+    </nav>
+
+    <!-- 主容器 -->
+    <div class="relative w-full h-screen flex">
+        <!-- 侧边栏：左侧卡片列表 -->
+        <aside id="sidebar" class="absolute left-4 top-20 bottom-4 w-72 z-[1000] flex flex-col gap-4 pointer-events-none">
+            <!-- 动态注入的卡片会出现在这里 -->
+        </aside>
+
+        <!-- 地图全屏背景 -->
+        <div id="map" class="w-full h-full"></div>
+    </div>
+
+    <script>
+        // GitHub 精选方案的数据驱动模式
+        const FOOTPRINTS = [
+            { id: 1, city: "西安", desc: "历史起点：千年长安的现代轨迹", date: "2023", latlng: [34.3416, 108.9398] },
+            { id: 2, city: "山东", desc: "当前停留：齐鲁大地的深度探索", date: "2026", latlng: [36.6683, 117.0204] }
+        ];
+
+        // 1. 初始化高水准地图
+        const map = L.map('map', { 
+            zoomControl: false, // 隐藏默认按钮
+            center: [35.0, 110.0], 
+            zoom: 5,
+            fadeAnimation: true
+        });
+
+        // 2. 加载 GitHub 开发者最爱的深色底图 (CartoDB Dark)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+        const sidebar = document.getElementById('sidebar');
+
+        // 3. 循环渲染足迹
+        FOOTPRINTS.forEach(loc => {
+            // A. 添加地图标记
+            const icon = L.divIcon({ className: '', html: '<div class="marker-pin"></div>', iconSize: [12, 12] });
+            const marker = L.marker(loc.latlng, { icon }).addTo(map);
+            
+            marker.bindPopup(`
+                <div class="p-2">
+                    <h4 class="font-bold text-indigo-400">${loc.city}</h4>
+                    <p class="text-[10px] text-zinc-400 mt-1">${loc.desc}</p>
+                </div>
+            `, { className: 'custom-popup', closeButton: false });
+
+            // B. 动态生成左侧卡片（点击可飞行）
+            const card = document.createElement('div');
+            card.className = "pointer-events-auto bg-zinc-900/80 backdrop-blur-xl border border-white/5 p-4 rounded-xl cursor-pointer hover:border-indigo-500/50 transition-all shadow-2xl group";
+            card.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <span class="text-xs font-bold tracking-tighter">${loc.city}</span>
+                    <span class="text-[9px] text-zinc-600">${loc.date}</span>
+                </div>
+                <p class="text-[10px] text-zinc-500 mt-2 group-hover:text-zinc-300 transition-colors">${loc.desc}</p>
+            `;
+            
+            card.onclick = () => {
+                map.flyTo(loc.latlng, 8, { duration: 1.5 });
+                marker.openPopup();
+            };
+            
+            sidebar.appendChild(card);
+        });
+
+        // 手机端优化：长按或双击防止缩放干扰
+        document.addEventListener('touchstart', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+    </script>
+</body>
+</html>
