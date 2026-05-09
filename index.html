@@ -3,125 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>XINGYU | THE VOYAGE</title>
-    <!-- 引入极简地图与动效库 -->
+    <title>VOYAGE LOG | 星屿</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Noto+Serif+SC:wght@200;500&display=swap');
         
         :root { --accent: #818cf8; }
-        body, html { margin: 0; background: #000; color: #fff; font-family: 'Syncopate', sans-serif; overflow: hidden; }
-
-        /* 极简深色地图层 */
-        #map { position: absolute; inset: 0; filter: grayscale(1) invert(0.9) contrast(1.2); opacity: 0; transition: opacity 3s ease; }
+        body { background: #000; color: #fff; font-family: 'Noto Serif SC', serif; overflow: hidden; }
+        .vibe-font { font-family: 'Syncopate', sans-serif; }
         
-        /* 玻璃拟态侧边栏 */
-        .glass-nav { background: rgba(0,0,0,0.4); backdrop-filter: blur(40px); border-right: 1px solid rgba(255,255,255,0.05); transform: translateX(-100%); transition: all 1s cubic-bezier(0.23, 1, 0.32, 1); }
-        .active .glass-nav { transform: translateX(0); }
-
-        /* 呼吸光点标记 */
-        .marker-dot { width: 10px; height: 10px; background: #fff; border-radius: 50%; box-shadow: 0 0 20px #fff, 0 0 40px var(--accent); animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.5; } 100% { transform: scale(1); opacity: 1; } }
-
-        /* 入口大片既视感 */
-        #hero { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; transition: all 1.5s cubic-bezier(0.77, 0, 0.175, 1); }
-        #hero.fade-out { transform: translateY(-100%); opacity: 0; }
-
-        .letter-spacing-huge { letter-spacing: 1.5em; text-indent: 1.5em; }
-        .text-serif { font-family: 'Noto Serif SC', serif; }
+        /* 这里的 CSS 决定了顶级质感 */
+        #map { position: absolute; inset: 0; filter: grayscale(1) invert(0.9) contrast(1.2); }
+        .glass { background: rgba(0,0,0,0.7); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.1); }
         
-        .list-item:hover .item-line { width: 100%; }
-        .item-line { width: 0; height: 1px; background: var(--accent); transition: width 0.6s ease; }
+        /* 自定义呼吸灯 Marker */
+        .marker-pulse {
+            width: 12px; height: 12px; background: var(--accent); border-radius: 50%;
+            box-shadow: 0 0 0 rgba(129, 140, 248, 0.4); animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(129, 140, 248, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(129, 140, 248, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(129, 140, 248, 0); }
+        }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
 
-    <!-- 1. 入口页：电影感开场 -->
-    <section id="hero">
-        <div class="mb-4 overflow-hidden">
-            <h2 id="title" class="text-xs tracking-[1em] text-zinc-500 uppercase opacity-0 translate-y-full transition-all duration-1000">Xingyu's Chronicles</h2>
-        </div>
-        <h1 class="text-4xl md:text-6xl font-bold letter-spacing-huge my-10 border-y border-white/5 py-12">星屿</h1>
-        <button onclick="startVoyage()" class="mt-10 group relative px-12 py-4 overflow-hidden">
-            <span class="relative z-10 text-[10px] tracking-[0.5em] uppercase">Enter the Map</span>
-            <div class="absolute bottom-0 left-0 w-full h-[1px] bg-white/20 group-hover:h-full group-hover:bg-white transition-all duration-500"></div>
-            <style>.group:hover span { color: #000; font-weight: bold; }</style>
+    <!-- 入口蒙层：氛围感核心 -->
+    <div id="hero" class="fixed inset-0 z-[100] flex flex-col items-center justify-center transition-all duration-[1200ms] ease-[cubic-bezier(0.23,1,0.32,1)]">
+        <div class="absolute inset-0 bg-black z-[-1]"></div>
+        <div class="absolute w-[80vw] h-[80vw] bg-indigo-500/10 rounded-full blur-[120px]"></div>
+        
+        <h1 class="vibe-font text-3xl md:text-5xl font-bold tracking-[0.5em] mb-4 opacity-0 animate-[fadeIn_2s_forwards]">VOYAGE LOG</h1>
+        <p class="text-zinc-500 tracking-[0.3em] font-light mb-16 opacity-0 animate-[fadeIn_2s_1s_forwards]">星屿旅行志</p>
+        
+        <button onclick="startVoyage()" class="group relative px-12 py-4 border border-zinc-800 hover:border-white transition-all duration-700">
+            <span class="vibe-font text-[10px] tracking-[0.8em] relative z-10">ENTER</span>
+            <div class="absolute inset-0 bg-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
         </button>
-    </section>
+    </div>
 
-    <!-- 2. 主交互区 -->
-    <div id="main-ui" class="relative w-full h-screen flex">
+    <!-- 主界面 -->
+    <div class="relative w-screen h-screen flex">
+        <!-- 侧边栏：磨砂质感 -->
+        <aside id="sidebar" class="fixed left-0 top-0 h-full w-full md:w-[350px] glass z-50 translate-x-[-100%] transition-transform duration-[800ms] flex flex-col">
+            <div class="p-12 border-b border-white/5">
+                <button onclick="backToHero()" class="vibe-font text-[8px] tracking-[0.4em] text-zinc-500 hover:text-white mb-6 transition-colors">← INDEX</button>
+                <h2 class="vibe-font text-xl tracking-[0.2em]">LOGS</h2>
+            </div>
+            <div id="list-container" class="flex-1 overflow-y-auto p-8 space-y-8 hide-scrollbar">
+                <!-- 动态注入数据 -->
+            </div>
+        </aside>
+
         <!-- 地图容器 -->
         <div id="map"></div>
-
-        <!-- 侧边栏：极简主义布局 -->
-        <nav class="glass-nav relative z-10 w-full md:w-[380px] h-full flex flex-col p-12">
-            <div class="mb-20">
-                <p class="text-[10px] tracking-[0.8em] text-zinc-500 uppercase mb-2">Portfolio Project</p>
-                <h3 class="text-2xl font-bold tracking-widest uppercase">Coordinates</h3>
-            </div>
-
-            <div id="location-list" class="flex-1 space-y-12 text-serif">
-                <!-- 由 JS 填充 -->
-            </div>
-
-            <div class="pt-10 opacity-30 text-[8px] tracking-[0.5em] uppercase">
-                © 2026 Interactive Experience
-            </div>
-        </nav>
     </div>
 
     <script>
         const DATA = [
-            { id: 1, name: "西安", en: "Xi'an", pos: [34.3416, 108.9398], date: "2023.09", desc: "古都余晖，旅程之始" },
-            { id: 2, name: "山东", en: "Shandong", pos: [36.6683, 117.0204], date: "2026.05", desc: "齐鲁大地，海风长鸣" }
+            { name: "西安", coords: [34.3416, 108.9398], date: "2023", info: "十三朝古都，旅途的锚点。" },
+            { name: "山东", coords: [36.6683, 117.0204], date: "2026", info: "齐鲁之地，山海共生。" }
         ];
 
         let map;
 
-        // 页面加载后的文字入场
-        window.onload = () => {
-            setTimeout(() => {
-                document.getElementById('title').classList.remove('opacity-0', 'translate-y-full');
-            }, 500);
-        };
-
-        function initMap() {
-            map = L.map('map', { zoomControl: false, zoomSnap: 0.1 });
+        function initApp() {
+            if (map) return;
+            map = L.map('map', { zoomControl: false, center: [35.5, 110.0], zoom: 5 });
+            
+            // 选用最干净的深色地图服务
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
-            
-            DATA.forEach(loc => {
-                const icon = L.divIcon({ className: '', html: '<div class="marker-dot"></div>', iconSize: [10, 10] });
-                L.marker(loc.pos, { icon }).addTo(map);
 
-                // 侧边栏列表生成
-                const item = document.createElement('div');
-                item.className = "list-item cursor-pointer group";
-                item.innerHTML = `
-                    <div class="flex items-end gap-4 mb-2">
-                        <span class="text-2xl font-medium tracking-tighter">${loc.name}</span>
-                        <span class="text-[8px] text-zinc-500 uppercase mb-1 tracking-widest">${loc.en} / ${loc.date}</span>
-                    </div>
-                    <div class="item-line"></div>
-                    <p class="text-[10px] text-zinc-400 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500 tracking-widest font-light">${loc.desc}</p>
+            const container = document.getElementById('list-container');
+            DATA.forEach(loc => {
+                // Marker 逻辑
+                const icon = L.divIcon({ className: '', html: '<div class="marker-pulse"></div>', iconSize: [12, 12] });
+                L.marker(loc.coords, { icon }).addTo(map).bindPopup(`<div style="color:#000;font-family:serif;"><b>${loc.name}</b><br>${loc.info}</div>`);
+
+                // 侧边栏卡片逻辑
+                const div = document.createElement('div');
+                div.className = "group cursor-pointer border-l border-zinc-800 pl-6 hover:border-indigo-400 transition-all py-2";
+                div.innerHTML = `
+                    <p class="vibe-font text-[9px] text-zinc-500 group-hover:text-indigo-400 transition-colors">${loc.date}</p>
+                    <h3 class="text-xl tracking-widest mt-1">${loc.name}</h3>
                 `;
-                item.onclick = () => map.flyTo(loc.pos, 9, { duration: 2.5 });
-                document.getElementById('location-list').appendChild(item);
+                div.onclick = () => map.flyTo(loc.coords, 9, { duration: 2 });
+                container.appendChild(div);
             });
-            
-            map.setView([35, 110], 5);
         }
 
         function startVoyage() {
-            document.getElementById('hero').classList.add('fade-out');
-            document.body.classList.add('active');
+            document.getElementById('hero').style.transform = 'scale(1.5)';
+            document.getElementById('hero').style.opacity = '0';
             setTimeout(() => {
-                document.getElementById('map').style.opacity = '1';
-                initMap();
-            }, 1000);
+                document.getElementById('hero').classList.add('hidden');
+                document.getElementById('sidebar').classList.add('translate-x-0');
+                initApp();
+            }, 800);
+        }
+
+        function backToHero() {
+            location.reload(); // 最简单的状态重置
         }
     </script>
+    <style>
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .leaflet-popup-content-wrapper { background: rgba(255,255,255,0.9); border-radius: 0; }
+    </style>
 </body>
 </html>
