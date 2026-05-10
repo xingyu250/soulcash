@@ -1,120 +1,332 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VOYAGE LOG | 星屿</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微醺时刻 | 我的私藏饮品志</title>
+    <!-- 引入字体和图标 -->
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
+    <!-- 引入 SortableJS 用于拖拽 -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <!-- 引入 ColorThief 用于提取颜色 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Noto+Serif+SC:wght@200;500&display=swap');
-        
-        :root { --accent: #818cf8; }
-        body { background: #000; color: #fff; font-family: 'Noto Serif SC', serif; overflow: hidden; }
-        .vibe-font { font-family: 'Syncopate', sans-serif; }
-        
-        /* 这里的 CSS 决定了顶级质感 */
-        #map { position: absolute; inset: 0; filter: grayscale(1) invert(0.9) contrast(1.2); }
-        .glass { background: rgba(0,0,0,0.7); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.1); }
-        
-        /* 自定义呼吸灯 Marker */
-        .marker-pulse {
-            width: 12px; height: 12px; background: var(--accent); border-radius: 50%;
-            box-shadow: 0 0 0 rgba(129, 140, 248, 0.4); animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(129, 140, 248, 0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(129, 140, 248, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(129, 140, 248, 0); }
+        :root {
+            --bg-color: #fcf8f2;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --accent-color: #d4a373;
+            --text-color: #5b4d42;
+            --shadow: 0 8px 30px rgba(0,0,0,0.05);
         }
 
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(212, 163, 115, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(212, 163, 115, 0.08) 0%, transparent 20%);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        h1 {
+            font-family: 'ZCOOL+XiaoWei', serif;
+            font-size: 2.5rem;
+            color: #4a3a2e;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: #a08d7c;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        /* 表单区域 */
+        .input-section {
+            max-width: 500px;
+            margin: 0 auto 50px;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        input[type="text"] {
+            border: none;
+            background: rgba(212, 163, 115, 0.1);
+            padding: 12px 20px;
+            border-radius: 12px;
+            outline: none;
+            color: var(--text-color);
+        }
+
+        .file-upload-btn {
+            background: var(--accent-color);
+            color: white;
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+            font-weight: 500;
+        }
+
+        .file-upload-btn:hover {
+            background: #bc8a5f;
+            transform: translateY(-2px);
+        }
+
+        #file-input { display: none; }
+
+        /* 列表区域 */
+        #drink-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .drink-card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1);
+            cursor: grab;
+            position: relative;
+            border: 1px solid transparent;
+        }
+
+        .drink-card:active { cursor: grabbing; }
+
+        .drink-card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        .drink-name {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        /* 色卡展示 */
+        .color-palette {
+            display: flex;
+            gap: 10px;
+        }
+
+        .color-swatch {
+            flex: 1;
+            height: 45px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            position: relative;
+            transition: flex 0.3s;
+        }
+        
+        .color-swatch:hover { flex: 1.5; }
+
+        /* 删除按钮 */
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.8);
+            border: none;
+            color: #ff6b6b;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .drink-card:hover .delete-btn { opacity: 1; }
+
+        /* 拖拽中的样式 */
+        .sortable-ghost {
+            opacity: 0.3;
+            transform: scale(0.9);
+        }
+
+        .sortable-chosen {
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid var(--accent-color);
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8rem; }
+            #drink-list { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- 入口蒙层：氛围感核心 -->
-    <div id="hero" class="fixed inset-0 z-[100] flex flex-col items-center justify-center transition-all duration-[1200ms] ease-[cubic-bezier(0.23,1,0.32,1)]">
-        <div class="absolute inset-0 bg-black z-[-1]"></div>
-        <div class="absolute w-[80vw] h-[80vw] bg-indigo-500/10 rounded-full blur-[120px]"></div>
-        
-        <h1 class="vibe-font text-3xl md:text-5xl font-bold tracking-[0.5em] mb-4 opacity-0 animate-[fadeIn_2s_forwards]">VOYAGE LOG</h1>
-        <p class="text-zinc-500 tracking-[0.3em] font-light mb-16 opacity-0 animate-[fadeIn_2s_1s_forwards]">星屿旅行志</p>
-        
-        <button onclick="startVoyage()" class="group relative px-12 py-4 border border-zinc-800 hover:border-white transition-all duration-700">
-            <span class="vibe-font text-[10px] tracking-[0.8em] relative z-10">ENTER</span>
-            <div class="absolute inset-0 bg-white scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
-        </button>
-    </div>
+    <header>
+        <h1>微醺时刻</h1>
+        <div class="subtitle">Personal Drink Collection</div>
+    </header>
 
-    <!-- 主界面 -->
-    <div class="relative w-screen h-screen flex">
-        <!-- 侧边栏：磨砂质感 -->
-        <aside id="sidebar" class="fixed left-0 top-0 h-full w-full md:w-[350px] glass z-50 translate-x-[-100%] transition-transform duration-[800ms] flex flex-col">
-            <div class="p-12 border-b border-white/5">
-                <button onclick="backToHero()" class="vibe-font text-[8px] tracking-[0.4em] text-zinc-500 hover:text-white mb-6 transition-colors">← INDEX</button>
-                <h2 class="vibe-font text-xl tracking-[0.2em]">LOGS</h2>
-            </div>
-            <div id="list-container" class="flex-1 overflow-y-auto p-8 space-y-8 hide-scrollbar">
-                <!-- 动态注入数据 -->
-            </div>
-        </aside>
+    <section class="input-section">
+        <div class="input-group">
+            <input type="text" id="drink-name" placeholder="给这款饮品起个好听的名字..." maxlength="15">
+            <label for="file-input" class="file-upload-btn">上传饮品照片</label>
+            <input type="file" id="file-input" accept="image/*">
+        </div>
+    </section>
 
-        <!-- 地图容器 -->
-        <div id="map"></div>
-    </div>
+    <main id="drink-list">
+        <!-- 卡片动态插入到这里 -->
+    </main>
 
     <script>
-        const DATA = [
-            { name: "西安", coords: [34.3416, 108.9398], date: "2023", info: "十三朝古都，旅途的锚点。" },
-            { name: "山东", coords: [36.6683, 117.0204], date: "2026", info: "齐鲁之地，山海共生。" }
-        ];
+        const drinkList = document.getElementById('drink-list');
+        const fileInput = document.getElementById('file-input');
+        const nameInput = document.getElementById('drink-name');
+        const colorThief = new ColorThief();
 
-        let map;
+        let drinks = JSON.parse(localStorage.getItem('my_drinks') || '[]');
 
-        function initApp() {
-            if (map) return;
-            map = L.map('map', { zoomControl: false, center: [35.5, 110.0], zoom: 5 });
+        // 初始化渲染
+        renderDrinks();
+
+        // 图片处理与添加
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const name = nameInput.value.trim() || "未命名饮品";
             
-            // 选用最干净的深色地图服务
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+            if (!file) return;
 
-            const container = document.getElementById('list-container');
-            DATA.forEach(loc => {
-                // Marker 逻辑
-                const icon = L.divIcon({ className: '', html: '<div class="marker-pulse"></div>', iconSize: [12, 12] });
-                L.marker(loc.coords, { icon }).addTo(map).bindPopup(`<div style="color:#000;font-family:serif;"><b>${loc.name}</b><br>${loc.info}</div>`);
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const base64 = event.target.result;
+                const img = new Image();
+                img.src = base64;
+                
+                img.onload = function() {
+                    // 提取颜色
+                    const palette = colorThief.getPalette(img, 3);
+                    const colors = palette.map(rgb => rgbToHex(rgb[0], rgb[1], rgb[2]));
+                    
+                    const newDrink = {
+                        id: Date.now(),
+                        name: name,
+                        image: base64,
+                        colors: colors
+                    };
 
-                // 侧边栏卡片逻辑
-                const div = document.createElement('div');
-                div.className = "group cursor-pointer border-l border-zinc-800 pl-6 hover:border-indigo-400 transition-all py-2";
-                div.innerHTML = `
-                    <p class="vibe-font text-[9px] text-zinc-500 group-hover:text-indigo-400 transition-colors">${loc.date}</p>
-                    <h3 class="text-xl tracking-widest mt-1">${loc.name}</h3>
+                    drinks.unshift(newDrink); // 新添加的放前面
+                    saveAndRender();
+                    nameInput.value = ''; // 清空输入
+                };
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function rgbToHex(r, g, b) {
+            return "#" + [r, g, b].map(x => {
+                const hex = x.toString(16);
+                return hex.length === 1 ? "0" + hex : hex;
+            }).join("");
+        }
+
+        function renderDrinks() {
+            drinkList.innerHTML = '';
+            drinks.forEach((drink) => {
+                const card = document.createElement('div');
+                card.className = 'drink-card';
+                card.dataset.id = drink.id;
+                
+                let colorHtml = drink.colors.map(c => `
+                    <div class="color-swatch" style="background-color: ${c}">
+                        <span>${c.toUpperCase()}</span>
+                    </div>
+                `).join('');
+
+                card.innerHTML = `
+                    <button class="delete-btn" onclick="deleteDrink(${drink.id})">×</button>
+                    <img src="${drink.image}" alt="${drink.name}">
+                    <div class="card-content">
+                        <span class="drink-name">${drink.name}</span>
+                        <div class="color-palette">
+                            ${colorHtml}
+                        </div>
+                    </div>
                 `;
-                div.onclick = () => map.flyTo(loc.coords, 9, { duration: 2 });
-                container.appendChild(div);
+                drinkList.appendChild(card);
             });
         }
 
-        function startVoyage() {
-            document.getElementById('hero').style.transform = 'scale(1.5)';
-            document.getElementById('hero').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('hero').classList.add('hidden');
-                document.getElementById('sidebar').classList.add('translate-x-0');
-                initApp();
-            }, 800);
+        function deleteDrink(id) {
+            if(confirm('确定要移除这款饮品吗？')) {
+                drinks = drinks.filter(d => d.id !== id);
+                saveAndRender();
+            }
         }
 
-        function backToHero() {
-            location.reload(); // 最简单的状态重置
+        function saveAndRender() {
+            localStorage.setItem('my_drinks', JSON.stringify(drinks));
+            renderDrinks();
         }
+
+        // 初始化拖拽排序
+        new Sortable(drinkList, {
+            animation: 400,
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            onEnd: function() {
+                // 重新获取排序后的数组
+                const newOrder = [];
+                document.querySelectorAll('.drink-card').forEach(card => {
+                    const id = parseInt(card.dataset.id);
+                    const drink = drinks.find(d => d.id === id);
+                    if (drink) newOrder.push(drink);
+                });
+                drinks = newOrder;
+                localStorage.setItem('my_drinks', JSON.stringify(drinks));
+            }
+        });
     </script>
-    <style>
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .leaflet-popup-content-wrapper { background: rgba(255,255,255,0.9); border-radius: 0; }
-    </style>
 </body>
 </html>
