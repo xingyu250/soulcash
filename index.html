@@ -1,12 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>饮料贴纸库 | 简历演示版</title>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+SC:wght@500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+
+    <style>
+        :root {
+            --paper: #f2ede4;
+            --kraft: #d4bc9d;
+            --accent: #8b6e51;
+            --box: #c5ad8d;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: var(--paper);
+            background-image: radial-gradient(var(--kraft) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: #5d4a3a;
+            padding: 10px;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* --- 装饰图样式 --- */
+        .deco-coffee {
+            position: fixed;
+            z-index: 1; 
+            pointer-events: none; 
+            filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.1));
+            opacity: 0.9;
+        }
+        .deco-1 { top: 5%; left: -30px; width: 120px; transform: rotate(-15deg); }
+        .deco-2 { bottom: 15%; right: -20px; width: 110px; transform: rotate(12deg); }
+
+        @media (max-width: 600px) {
+            .deco-1 { width: 80px; left: -10px; }
+            .deco-2 { width: 70px; right: -10px; }
+        }
+
+        /* --- 弹窗公告 --- */
+        #announcement-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        .announcement-card {
+            background: white;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            border: 4px solid var(--kraft);
+        }
+        .announcement-card h2 { font-family: 'Gaegu', cursive; color: var(--accent); font-size: 2rem; margin-bottom: 15px;}
+        .announcement-card p { font-size: 1rem; line-height: 1.6; margin-bottom: 20px; color: #666; }
+        .btn-close-notice { background: var(--accent); color: white; border: none; padding: 12px 30px; border-radius: 30px; cursor: pointer; font-weight: bold; }
+        .fade-out { opacity: 0; pointer-events: none; }
+
+        /* --- 主内容区 --- */
+        header { text-align: center; padding: 20px 0; position: relative; z-index: 10; }
+        h1 { font-family: 'Gaegu', cursive; font-size: 2.8rem; color: #4a3a2e; }
+
+        .calendar-card {
+            background: rgba(255, 255, 255, 0.95);
+            max-width: 800px; margin: 0 auto 30px;
+            padding: 15px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border-top: 12px solid var(--accent);
+            position: relative; z-index: 10;
+        }
+        .cal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-family: 'Gaegu', cursive; font-size: 1.6rem; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .wd { text-align: center; font-size: 0.75rem; color: var(--accent); font-weight: bold; }
+        .day { aspect-ratio: 1; border: 1px solid #f0f0f0; border-radius: 6px; position: relative; cursor: pointer; overflow: hidden; }
+        .day.selected { background: var(--paper); outline: 2px solid var(--accent); z-index: 1; }
+        .day.today { background: #fff9e6; border: 1.5px solid var(--accent); }
+        .d-num { font-family: 'Gaegu', cursive; font-size: 1rem; padding: 2px 4px; }
+        .d-previews { display: flex; flex-wrap: wrap; gap: 1px; padding: 2px; }
+        .dot-pre { width: 8px; height: 8px; border-radius: 50%; border: 1px solid white; }
+
+        .box-title { text-align: center; font-family: 'Gaegu', cursive; margin-bottom: 10px; font-size: 1.5rem; position: relative; z-index: 10; }
+        .box { background: var(--box); max-width: 800px; margin: 0 auto 100px; border: 10px solid var(--kraft); border-radius: 4px; padding: 40px 20px; position: relative; box-shadow: inset 0 0 60px rgba(0,0,0,0.2); min-height: 350px; z-index: 10; }
+        #sticker-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 30px; }
+
+        .sticker { display: flex; flex-direction: column; align-items: center; position: relative; cursor: grab; }
+        .st-wrap { position: relative; filter: drop-shadow(3px 0 0 white) drop-shadow(-3px 0 0 white) drop-shadow(0 3px 0 white) drop-shadow(0 -3px 0 white) drop-shadow(2px 6px 8px rgba(0,0,0,0.25)); }
+        .st-img { width: 110px; height: 110px; object-fit: cover; clip-path: polygon(4% 2%, 98% 5%, 95% 96%, 3% 100%); display: block; }
+        .st-name { font-family: 'Gaegu', cursive; background: white; padding: 2px 10px; margin-top: 12px; font-size: 1.1rem; box-shadow: 1px 1px 3px rgba(0,0,0,0.1); transform: rotate(-1deg); }
+        .st-palette { display: flex; gap: 6px; margin-top: 8px; }
+        .st-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid white; box-shadow: 1px 2px 4px rgba(0,0,0,0.2); }
+        .del { position: absolute; top: -10px; right: 10px; background: #ff5e5e; color: white; border: none; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; display: none; z-index: 20; }
+        .sticker:hover .del { display: block; }
+
+        .fab { position: fixed; bottom: 30px; right: 30px; background: var(--accent); color: white; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; cursor: pointer; z-index: 100; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        #file-input { display: none; }
+    </style>
+</head>
+<body>
+
+    <img src="https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=200&q=80&fmt=png" class="deco-coffee deco-1" alt="">
+    <img src="https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=200&q=80&fmt=png" class="deco-coffee deco-2" alt="">
+
     <div id="announcement-overlay">
         <div class="announcement-card">
             <h2>欢迎来到我的饮品手帐 🍹</h2>
             <p>这是一个交互式饮品手帐，您可以现场扫描并上传一张您现在的饮品照片，体验贴纸自动生成效果！</p>
             
-            <div style="text-align: right; font-size: 0.8rem; color: #999; margin-top: -15px; margin-bottom: 20px; font-family: 'Gaegu', cursive;">
+            <div style="text-align: right; font-size: 0.85rem; color: #999; margin-top: -10px; margin-bottom: 20px; font-family: 'Gaegu', cursive;">
                 作者：xingyu
             </div>
 
             <button class="btn-close-notice" onclick="closeNotice()">我知道啦</button>
         </div>
     </div>
+
+    <header>
+        <h1>饮料日记贴纸库</h1>
+    </header>
+
+    <div class="calendar-card">
+        <div class="cal-head">
+            <span onclick="moveMonth(-1)" style="cursor:pointer">⇠ 上个月</span>
+            <div id="month-display"></div>
+            <span onclick="moveMonth(step=1)" style="cursor:pointer">下个月 ⇢</span>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+    </div>
+
+    <div class="box-title" id="box-status">请选择日期...</div>
+
+    <div class="box">
+        <div id="sticker-list"></div>
+    </div>
+
+    <label for="file-input" class="fab">+</label>
+    <input type="file" id="file-input" accept="image/*">
+
+    <script>
+        function closeNotice() {
+            const overlay = document.getElementById('announcement-overlay');
+            overlay.classList.add('fade-out');
+            setTimeout(() => overlay.remove(), 500);
+        }
+
+        let calendarDate = new Date();
+        let selectedDay = formatDate(new Date());
+        let drinkStorage = JSON.parse(localStorage.getItem('drink_diary_v5') || '[]');
+        const colorThief = new ColorThief();
+
+        function formatDate(d) {
+            return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
+        }
+
+        function init() {
+            updateMonthView();
+            renderBox();
+            new Sortable(document.getElementById('sticker-list'), {
+                animation: 300,
+                onEnd: function() {
+                    const sortedIds = [...document.querySelectorAll('.sticker')].map(el => parseInt(el.dataset.id));
+                    const otherDayDrinks = drinkStorage.filter(d => d.date !== selectedDay);
+                    const thisDayDrinks = sortedIds.map(id => drinkStorage.find(d => d.id === id));
+                    drinkStorage = [...otherDayDrinks, ...thisDayDrinks];
+                    localStorage.setItem('drink_diary_v5', JSON.stringify(drinkStorage));
+                }
+            });
+        }
+
+        function moveMonth(step) {
+            calendarDate.setMonth(calendarDate.getMonth() + step);
+            updateMonthView();
+        }
+
+        function updateMonthView() {
+            const grid = document.getElementById('cal-grid');
+            const display = document.getElementById('month-display');
+            grid.innerHTML = '';
+            const year = calendarDate.getFullYear();
+            const month = calendarDate.getMonth();
+            display.innerText = `${year}年 ${month + 1}月`;
+            ['日','一','二','三','四','五','六'].forEach(w => grid.insertAdjacentHTML('beforeend', `<div class="wd">${w}</div>`));
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            for (let i = 0; i < firstDay; i++) grid.insertAdjacentHTML('beforeend', '<div></div>');
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dateStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}`;
+                const dayDrinks = drinkStorage.filter(d => d.date === dateStr);
+                let dotsHtml = dayDrinks.slice(0, 3).map(d => `<div class="dot-pre" style="background:${d.colors ? d.colors[0] : '#ccc'}"></div>`).join('');
+                const dayEl = document.createElement('div');
+                dayEl.className = `day ${dateStr === selectedDay ? 'selected' : ''} ${dateStr === formatDate(new Date()) ? 'today' : ''}`;
+                dayEl.innerHTML = `<div class="d-num">${i}</div><div class="d-previews">${dotsHtml}</div>`;
+                dayEl.onclick = () => { selectedDay = dateStr; updateMonthView(); renderBox(); };
+                grid.appendChild(dayEl);
+            }
+            document.getElementById('box-status').innerText = `${selectedDay} 的记录`;
+        }
+
+        function renderBox() {
+            const list = document.getElementById('sticker-list');
+            list.innerHTML = '';
+            const dayDrinks = drinkStorage.filter(d => d.date === selectedDay);
+            if(dayDrinks.length === 0) {
+                list.innerHTML = `<div style="grid-column:1/-1; text-align:center; opacity:0.4; padding-top:60px;">这里还没有贴纸，点右下角添加吧！</div>`;
+                return;
+            }
+            dayDrinks.forEach(item => {
+                const colorsHtml = (item.colors || []).map(c => `<div class="st-dot" style="background:${c}"></div>`).join('');
+                const el = document.createElement('div');
+                el.className = 'sticker';
+                el.dataset.id = item.id;
+                el.style.transform = `rotate(${item.rot}deg)`;
+                el.innerHTML = `<button class="del" onclick="deleteItem(${item.id})">✕</button>
+                    <div class="st-wrap"><img src="${item.img}" class="st-img"></div>
+                    <div class="st-name">${item.name}</div><div class="st-palette">${colorsHtml}</div>`;
+                list.appendChild(el);
+            });
+        }
+
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const name = prompt("给这款饮料起个名字：") || "我的饮品";
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const img = new Image();
+                img.src = ev.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const size = 300; canvas.width = size; canvas.height = size;
+                    const ctx = canvas.getContext('2d');
+                    const min = Math.min(img.width, img.height);
+                    ctx.drawImage(img, (img.width-min)/2, (img.height-min)/2, min, min, 0, 0, size, size);
+                    let colors = ["#8b6e51"];
+                    try { colors = colorThief.getPalette(img, 4).map(rgb => `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`); } catch(e) {}
+                    drinkStorage.push({ id: Date.now(), date: selectedDay, name: name, img: canvas.toDataURL('image/jpeg', 0.6), colors: colors, rot: Math.random() * 12 - 6 });
+                    localStorage.setItem('drink_diary_v5', JSON.stringify(drinkStorage));
+                    updateMonthView(); renderBox();
+                };
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function deleteItem(id) {
+            if(confirm("确定撕掉吗？")) {
+                drinkStorage = drinkStorage.filter(d => d.id !== id);
+                localStorage.setItem('drink_diary_v5', JSON.stringify(drinkStorage));
+                updateMonthView(); renderBox();
+            }
+        }
+        init();
+    </script>
+</body>
+</html>
