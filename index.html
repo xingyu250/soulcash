@@ -26,6 +26,39 @@
             color: #5d4a3a;
             padding: 10px;
             min-height: 100vh;
+            position: relative; /* 为装饰品提供定位参考 */
+            overflow-x: hidden;
+        }
+
+        /* --- 新增：背景装饰咖啡 --- */
+        .deco-coffee {
+            position: fixed;
+            z-index: -1; /* 放在所有内容下面 */
+            pointer-events: none; /* 鼠标点不到它，不影响操作 */
+            filter: drop-shadow(5px 10px 15px rgba(0,0,0,0.1));
+            opacity: 0.8;
+        }
+
+        /* 左上角的黑咖啡 */
+        .deco-1 {
+            top: 20px;
+            left: -40px;
+            width: 180px;
+            transform: rotate(-15deg);
+        }
+
+        /* 右下角的奶铁 */
+        .deco-2 {
+            bottom: 50px;
+            right: -30px;
+            width: 150px;
+            transform: rotate(10deg);
+        }
+
+        /* 手机端缩小装饰品 */
+        @media (max-width: 600px) {
+            .deco-1 { width: 100px; left: -20px; top: 10px; }
+            .deco-2 { width: 90px; right: -15px; bottom: 100px; }
         }
 
         /* --- 弹窗公告样式 --- */
@@ -33,7 +66,7 @@
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(5px); /* 背景模糊，很有高级感 */
+            backdrop-filter: blur(5px);
             z-index: 2000;
             display: flex;
             align-items: center;
@@ -50,51 +83,22 @@
             text-align: center;
             box-shadow: 0 20px 50px rgba(0,0,0,0.3);
             border: 4px solid var(--kraft);
-            position: relative;
-            transform: scale(1);
-            transition: transform 0.3s ease;
         }
 
-        .announcement-card h2 {
-            font-family: 'Gaegu', cursive;
-            color: var(--accent);
-            margin-bottom: 15px;
-            font-size: 2rem;
-        }
-
-        .announcement-card p {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            margin-bottom: 25px;
-            color: #666;
-        }
-
-        .btn-close-notice {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 30px;
-            font-size: 1rem;
-            cursor: pointer;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-
-        .btn-close-notice:hover { transform: translateY(-2px); }
-
-        /* 隐藏动画 */
+        .announcement-card h2 { font-family: 'Gaegu', cursive; color: var(--accent); margin-bottom: 15px; font-size: 2rem; }
+        .btn-close-notice { background: var(--accent); color: white; border: none; padding: 12px 30px; border-radius: 30px; font-size: 1rem; cursor: pointer; font-weight: bold; }
         .fade-out { opacity: 0; pointer-events: none; }
-        .fade-out .announcement-card { transform: scale(0.9) rotate(-5deg); }
 
-        /* --- 原有样式保持不变 --- */
-        header { text-align: center; padding: 20px 0; }
+        /* --- 主体样式 --- */
+        header { text-align: center; padding: 20px 0; position: relative; z-index: 10; }
         h1 { font-family: 'Gaegu', cursive; font-size: 2.8rem; color: #4a3a2e; }
 
         .calendar-card {
-            background: #fff; max-width: 800px; margin: 0 auto 30px;
+            background: rgba(255, 255, 255, 0.9); /* 半透明背景，能透出一点底下的装饰 */
+            max-width: 800px; margin: 0 auto 30px;
             padding: 15px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.05);
             border-top: 12px solid var(--accent);
+            position: relative; z-index: 10;
         }
 
         .cal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-family: 'Gaegu', cursive; font-size: 1.6rem; }
@@ -107,17 +111,17 @@
         .d-previews { display: flex; flex-wrap: wrap; gap: 1px; padding: 2px; }
         .dot-pre { width: 8px; height: 8px; border-radius: 50%; border: 1px solid white; }
 
-        .box-title { text-align: center; font-family: 'Gaegu', cursive; margin-bottom: 10px; font-size: 1.5rem; }
-        .box { background: var(--box); max-width: 800px; margin: 0 auto 100px; border: 10px solid var(--kraft); border-radius: 4px; padding: 40px 20px; position: relative; box-shadow: inset 0 0 60px rgba(0,0,0,0.2); min-height: 350px; }
+        .box-title { text-align: center; font-family: 'Gaegu', cursive; margin-bottom: 10px; font-size: 1.5rem; position: relative; z-index: 10; }
+        .box { background: var(--box); max-width: 800px; margin: 0 auto 100px; border: 10px solid var(--kraft); border-radius: 4px; padding: 40px 20px; position: relative; box-shadow: inset 0 0 60px rgba(0,0,0,0.2); min-height: 350px; z-index: 10; }
         #sticker-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 30px; }
 
         .sticker { display: flex; flex-direction: column; align-items: center; position: relative; cursor: grab; }
         .st-wrap { position: relative; filter: drop-shadow(3px 0 0 white) drop-shadow(-3px 0 0 white) drop-shadow(0 3px 0 white) drop-shadow(0 -3px 0 white) drop-shadow(2px 6px 8px rgba(0,0,0,0.25)); }
-        .st-img { width: 110px; height: 110px; object-fit: cover; clip-path: polygon(4% 2%, 98% 5%, 95% 96%, 3% 100%); display: block; background: #eee; }
+        .st-img { width: 110px; height: 110px; object-fit: cover; clip-path: polygon(4% 2%, 98% 5%, 95% 96%, 3% 100%); display: block; }
         .st-name { font-family: 'Gaegu', cursive; background: white; padding: 2px 10px; margin-top: 12px; font-size: 1.1rem; box-shadow: 1px 1px 3px rgba(0,0,0,0.1); transform: rotate(-1deg); }
         .st-palette { display: flex; gap: 6px; margin-top: 8px; }
         .st-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid white; box-shadow: 1px 2px 4px rgba(0,0,0,0.2); }
-        .del { position: absolute; top: -10px; right: 10px; background: #ff5e5e; color: white; border: none; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; display: none; z-index: 10; }
+        .del { position: absolute; top: -10px; right: 10px; background: #ff5e5e; color: white; border: none; width: 22px; height: 22px; border-radius: 50%; cursor: pointer; display: none; z-index: 20; }
         .sticker:hover .del { display: block; }
 
         .fab { position: fixed; bottom: 30px; right: 30px; background: var(--accent); color: white; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 35px; cursor: pointer; z-index: 100; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
@@ -125,6 +129,9 @@
     </style>
 </head>
 <body>
+
+    <img src="coffee1.png" class="deco-coffee deco-1" alt="decoration">
+    <img src="coffee2.png" class="deco-coffee deco-2" alt="decoration">
 
     <div id="announcement-overlay">
         <div class="announcement-card">
@@ -157,15 +164,14 @@
     <input type="file" id="file-input" accept="image/*">
 
     <script>
-        // 弹窗关闭逻辑
+        // 弹窗逻辑
         function closeNotice() {
             const overlay = document.getElementById('announcement-overlay');
             overlay.classList.add('fade-out');
-            // 延迟移除 DOM 元素，让动画播完
             setTimeout(() => overlay.remove(), 500);
         }
 
-        // --- 以下为之前的业务逻辑 ---
+        // 业务逻辑
         let calendarDate = new Date();
         let selectedDay = formatDate(new Date());
         let drinkStorage = JSON.parse(localStorage.getItem('drink_diary_v5') || '[]');
