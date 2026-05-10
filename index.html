@@ -3,312 +3,331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的饮料贴纸库 | My Cozy Drink Sticker Collection</title>
-    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Gaegu:wght@400;700&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
+    <title>我的饮料贴纸库 | Sticker Box</title>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+SC:wght@500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
 
     <style>
         :root {
-            --bg-paper: #e6dac8; 
-            --box-inner-bg: #d8c3a5; 
-            --box-border: #8b6e51; 
-            --sticker-bg: #ffffff; 
-            --text-color: #5b4d42;
-            --accent-color: #d4a373;
-            --shadow-sticker: 2px 4px 8px rgba(0,0,0,0.15);
+            --paper-dark: #d4bc9d;
+            --paper-light: #eaddca;
+            --box-inner: #c5ad8d;
+            --sticker-border: #ffffff;
+            --accent: #8b6e51;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Noto Sans SC', sans-serif;
-            background-color: var(--bg-paper);
-            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48ZyBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM4YjZlNTEiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTAgMGg0MHY0MEgwVjB6bTIwIDIwaDIwdjIwSDIWMjB6TTAgMjBoMjB2MjBIMFYyMHoyMCAwaDIwdjIwSDIwVjB6Ii8+PC9nPjwvZz48L3N2Zz4=');
-            color: var(--text-color);
-            min-height: 100vh;
-            padding: 10px;
-        }
-
-        header {
-            text-align: center;
-            padding: 30px 0;
-        }
-
-        h1 {
-            font-family: 'Gaegu', cursive;
-            font-size: 2.8rem;
-            color: #4a3a2e;
-            text-shadow: 1px 1px 0px #fff;
-        }
-
-        .subtitle {
-            font-size: 1rem;
-            color: #a08d7c;
-            font-family: 'Gaegu', cursive;
-            letter-spacing: 1px;
-        }
-
-        /* 剪贴板输入区 */
-        .input-section {
-            background: #fff;
-            border-radius: 4px;
+            background-color: #f0e6d6;
+            /* 牛皮纸底纹 */
+            background-image: radial-gradient(#d4bc9d 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: #5d4a3a;
             padding: 20px;
-            border-bottom: 4px solid #ddd;
-            max-width: 400px;
+            overflow-x: hidden;
+        }
+
+        header { text-align: center; margin-bottom: 30px; }
+        h1 { font-family: 'Gaegu', cursive; font-size: 3rem; color: #4a3a2e; }
+        .subtitle { font-family: 'Gaegu', cursive; font-size: 1.2rem; opacity: 0.7; }
+
+        /* 上传区域：模拟文件夹 */
+        .upload-zone {
+            background: #fff;
+            max-width: 450px;
             margin: 0 auto 40px;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 10px solid var(--accent);
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
             position: relative;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .input-section::before {
-            content: '';
-            position: absolute;
-            top: -10px; left: 50%;
-            transform: translateX(-50%);
-            width: 60px; height: 20px;
-            background: #666; border-radius: 4px;
         }
 
-        .input-group { display: flex; flex-direction: column; gap: 12px; }
-
-        input[type="text"] {
-            border: 1px solid #ccc;
+        .upload-zone input[type="text"] {
+            width: 100%;
             padding: 10px;
+            border: 1px dashed var(--accent);
             border-radius: 4px;
+            margin-bottom: 10px;
             outline: none;
-            font-family: inherit;
         }
 
-        .file-upload-btn {
-            background: var(--accent-color);
+        .btn-upload {
+            display: block;
+            background: var(--accent);
             color: white;
+            text-align: center;
             padding: 12px;
             border-radius: 4px;
-            text-align: center;
             cursor: pointer;
             font-weight: bold;
+            transition: 0.3s;
         }
 
+        .btn-upload:hover { filter: brightness(1.2); }
         #file-input { display: none; }
 
-        /* 纸箱容器 */
-        .box-container {
-            background-color: var(--box-inner-bg);
-            border: 10px solid var(--box-border);
-            border-radius: 8px;
-            padding: 40px 20px;
+        /* 纸箱设计 */
+        .cardboard-box {
+            background: var(--box-inner);
             max-width: 1000px;
-            margin: 0 auto;
-            min-height: 400px;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.1);
-        }
-
-        #drink-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 30px;
-        }
-
-        /* 贴纸卡片样式 */
-        .drink-card {
-            background: white;
-            padding: 10px 10px 15px 10px;
-            box-shadow: var(--shadow-sticker);
-            transition: transform 0.2s;
-            cursor: grab;
+            margin: 40px auto;
+            border: 12px solid var(--paper-dark);
+            border-radius: 4px;
+            padding: 50px 30px;
             position: relative;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.2), 0 20px 40px rgba(0,0,0,0.15);
+            min-height: 500px;
+        }
+
+        /* 模拟纸箱盖子 */
+        .cardboard-box::before, .cardboard-box::after {
+            content: '';
+            position: absolute;
+            background: var(--paper-light);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 1;
+        }
+        /* 左盖子 */
+        .cardboard-box::before {
+            top: -12px; left: -80px; width: 80px; height: 100.5%;
+            transform-origin: right;
+            transform: perspective(600px) rotateY(20deg);
+            border: 2px solid var(--paper-dark);
+        }
+        /* 右盖子 */
+        .cardboard-box::after {
+            top: -12px; right: -80px; width: 80px; height: 100.5%;
+            transform-origin: left;
+            transform: perspective(600px) rotateY(-20deg);
+            border: 2px solid var(--paper-dark);
+        }
+
+        #sticker-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 40px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* 核心：贴纸外观设计 */
+        .sticker-item {
+            position: relative;
+            cursor: grab;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .sticker-item:active { cursor: grabbing; }
+
+        /* 贴纸图片层 */
+        .sticker-wrapper {
+            position: relative;
+            /* 关键滤镜：模拟厚白边 */
+            filter: 
+                drop-shadow(4px 0 0 white) 
+                drop-shadow(-4px 0 0 white) 
+                drop-shadow(0 4px 0 white) 
+                drop-shadow(0 -4px 0 white)
+                drop-shadow(5px 8px 10px rgba(0,0,0,0.2));
+            margin-bottom: 15px;
+        }
+
+        .sticker-img {
+            width: 160px;
+            height: 160px;
+            object-fit: cover;
+            /* 模拟不规则手工剪裁 */
+            clip-path: polygon(
+                10% 0%, 90% 5%, 100% 15%, 95% 85%, 
+                85% 100%, 15% 95%, 0% 80%, 5% 15%
+            );
+            background: #eee;
+            display: block;
+        }
+
+        /* 饮品名字：手写标签感 */
+        .sticker-label {
+            font-family: 'Gaegu', cursive;
+            background: rgba(255,255,255,0.9);
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            transform: rotate(-2deg);
             border: 1px solid #eee;
         }
 
-        .drink-card img {
-            width: 100%;
-            height: 160px;
-            object-fit: contain;
-            background: #fafafa;
-            margin-bottom: 10px;
-        }
-
-        .drink-name {
-            display: block;
-            font-family: 'Gaegu', cursive;
-            font-size: 1.2rem;
-            text-align: center;
-            margin-bottom: 8px;
-            color: #333;
-        }
-
-        .color-palette {
+        /* 色卡：小圆点贴纸 */
+        .palette-dots {
             display: flex;
-            gap: 8px;
-            justify-content: center;
+            gap: 5px;
+            margin-top: 8px;
         }
-
-        .color-swatch {
-            width: 24px;
-            height: 24px;
+        .dot {
+            width: 15px;
+            height: 15px;
             border-radius: 50%;
-            border: 2px solid #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 2px solid white;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
         }
 
-        .delete-btn {
+        .del-btn {
             position: absolute;
             top: -10px;
-            right: -10px;
+            right: 0;
+            background: #ff4757;
+            color: white;
+            border: none;
             width: 24px;
             height: 24px;
-            background: #ff6b6b;
-            color: white;
-            border: 2px solid white;
             border-radius: 50%;
             cursor: pointer;
             display: none;
-            align-items: center;
-            justify-content: center;
             z-index: 10;
         }
+        .sticker-item:hover .del-btn { display: block; }
 
-        .drink-card:hover .delete-btn { display: flex; }
+        .sortable-ghost { opacity: 0.2; transform: scale(0.8); }
 
-        .sortable-ghost { opacity: 0; }
+        @media (max-width: 600px) {
+            .cardboard-box::before, .cardboard-box::after { display: none; }
+            .cardboard-box { margin: 10px; padding: 20px; border-width: 6px; }
+        }
     </style>
 </head>
 <body>
 
     <header>
         <h1>我的饮料贴纸库</h1>
-        <div class="subtitle">My Cozy Drink Sticker Collection</div>
+        <p class="subtitle">Drink Sticker Archive</p>
     </header>
 
-    <section class="input-section">
-        <div class="input-group">
-            <input type="text" id="drink-name" placeholder="给这张贴纸起个名字..." maxlength="12">
-            <label for="file-input" class="file-upload-btn">📷 制作贴纸</label>
-            <input type="file" id="file-input" accept="image/*">
-        </div>
-    </section>
+    <div class="upload-zone">
+        <input type="text" id="drink-name" placeholder="为这枚贴纸命名...">
+        <label for="file-input" class="btn-upload">✨ 制作我的贴纸</label>
+        <input type="file" id="file-input" accept="image/*">
+    </div>
 
-    <main class="box-container">
-        <div id="drink-list"></div>
-    </main>
+    <div class="cardboard-box">
+        <div id="sticker-container"></div>
+    </div>
 
     <script>
-        const drinkList = document.getElementById('drink-list');
+        const container = document.getElementById('sticker-container');
         const fileInput = document.getElementById('file-input');
         const nameInput = document.getElementById('drink-name');
         const colorThief = new ColorThief();
 
-        let drinks = JSON.parse(localStorage.getItem('my_drinks_stickers') || '[]');
+        let stickerData = JSON.parse(localStorage.getItem('drink_stickers_v3') || '[]');
 
-        renderDrinks();
+        render();
 
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
-            const name = nameInput.value.trim() || "好喝的！";
             if (!file) return;
 
             const reader = new FileReader();
             reader.onload = function(event) {
                 const img = new Image();
                 img.src = event.target.result;
-                
                 img.onload = function() {
-                    // --- 核心修复：图片压缩逻辑 ---
+                    // 1. 压缩图片
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 600; // 限制贴纸最大宽度，节省存储空间
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    }
-                    canvas.width = width;
-                    canvas.height = height;
+                    const size = 400; // 贴纸质量上限
+                    canvas.width = size;
+                    canvas.height = size;
                     const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
                     
-                    // 转回压缩后的 base64
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                    // 居中裁剪成正方形绘制到 canvas
+                    const min = Math.min(img.width, img.height);
+                    ctx.drawImage(img, (img.width-min)/2, (img.height-min)/2, min, min, 0, 0, size, size);
+                    
+                    const base64 = canvas.toDataURL('image/webp', 0.8);
 
-                    // 提取颜色
-                    let colors = ['#D4A373', '#E6DAC8']; // 默认兜底色
+                    // 2. 提取颜色
+                    let colors = ["#ffffff"];
                     try {
-                        const palette = colorThief.getPalette(img, 3);
-                        colors = palette.map(rgb => rgbToHex(rgb[0], rgb[1], rgb[2]));
-                    } catch (e) {
-                        console.log("颜色提取失败，使用默认色");
-                    }
-                    
-                    const newDrink = {
-                        id: Date.now(),
-                        name: name,
-                        image: compressedBase64,
-                        colors: colors,
-                        rot: Math.random() * 10 - 5 // 随机旋转度数
-                    };
+                        colors = colorThief.getPalette(img, 3).map(rgb => `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`);
+                    } catch(e) {}
 
-                    drinks.unshift(newDrink);
-                    saveData();
-                    renderDrinks();
+                    // 3. 生成随机形状和旋转
+                    const randomPath = generateRandomClipPath();
+                    
+                    stickerData.unshift({
+                        id: Date.now(),
+                        name: nameInput.value || "好喝的",
+                        img: base64,
+                        colors: colors,
+                        rotate: Math.random() * 14 - 7,
+                        path: randomPath
+                    });
+
+                    save();
+                    render();
                     nameInput.value = '';
                 };
             };
             reader.readAsDataURL(file);
         });
 
-        function rgbToHex(r, g, b) {
-            return "#" + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join("");
+        // 核心函数：生成不规则的剪裁路径，让贴纸更真实
+        function generateRandomClipPath() {
+            const v = () => 10 + Math.random() * 80; 
+            // 返回一个稍微扭曲的多边形
+            return `polygon(
+                ${Math.random()*15}% ${Math.random()*15}%, 
+                ${85 + Math.random()*15}% ${Math.random()*15}%, 
+                ${85 + Math.random()*15}% ${85 + Math.random()*15}%, 
+                ${Math.random()*15}% ${85 + Math.random()*15}%
+            )`;
         }
 
-        function renderDrinks() {
-            drinkList.innerHTML = '';
-            drinks.forEach((drink) => {
-                const card = document.createElement('div');
-                card.className = 'drink-card';
-                card.dataset.id = drink.id;
-                card.style.transform = `rotate(${drink.rot || 0}deg)`;
-                
-                let colorHtml = drink.colors.map(c => `
-                    <div class="color-swatch" style="background-color: ${c}"></div>
-                `).join('');
+        function render() {
+            container.innerHTML = '';
+            stickerData.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'sticker-item';
+                div.dataset.id = item.id;
+                div.style.transform = `rotate(${item.rotate}deg)`;
 
-                card.innerHTML = `
-                    <button class="delete-btn" onclick="deleteDrink(${drink.id})">×</button>
-                    <img src="${drink.image}" alt="${drink.name}">
-                    <span class="drink-name">${drink.name}</span>
-                    <div class="color-palette">${colorHtml}</div>
+                const dots = item.colors.map(c => `<div class="dot" style="background:${c}"></div>`).join('');
+
+                div.innerHTML = `
+                    <button class="del-btn" onclick="remove(${item.id})">✕</button>
+                    <div class="sticker-wrapper">
+                        <img src="${item.img}" class="sticker-img" style="clip-path: ${item.path || 'none'}">
+                    </div>
+                    <div class="sticker-label">${item.name}</div>
+                    <div class="palette-dots">${dots}</div>
                 `;
-                drinkList.appendChild(card);
+                container.appendChild(div);
             });
         }
 
-        function deleteDrink(id) {
-            drinks = drinks.filter(d => d.id !== id);
-            saveData();
-            renderDrinks();
+        function remove(id) {
+            stickerData = stickerData.filter(i => i.id !== id);
+            save();
+            render();
         }
 
-        function saveData() {
-            try {
-                localStorage.setItem('my_drinks_stickers', JSON.stringify(drinks));
-            } catch (e) {
-                alert("存储空间满了！请删掉一些旧贴纸再添加。");
-            }
+        function save() {
+            localStorage.setItem('drink_stickers_v3', JSON.stringify(stickerData));
         }
 
-        new Sortable(drinkList, {
-            animation: 300,
+        new Sortable(container, {
+            animation: 350,
             ghostClass: 'sortable-ghost',
-            onEnd: function() {
-                const newOrder = [];
-                document.querySelectorAll('.drink-card').forEach(card => {
-                    const id = parseInt(card.dataset.id);
-                    const drink = drinks.find(d => d.id === id);
-                    if (drink) newOrder.push(drink);
-                });
-                drinks = newOrder;
-                localStorage.setItem('my_drinks_stickers', JSON.stringify(drinks));
+            onEnd: () => {
+                const ids = [...container.querySelectorAll('.sticker-item')].map(el => parseInt(el.dataset.id));
+                stickerData = ids.map(id => stickerData.find(i => i.id === id));
+                save();
             }
         });
     </script>
