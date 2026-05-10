@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的饮料贴纸库 | Sticker Box</title>
+    <title>我的饮料贴纸库 | Final Stable</title>
     <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+SC:wght@500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
@@ -13,7 +13,6 @@
             --paper-dark: #d4bc9d;
             --paper-light: #eaddca;
             --box-inner: #c5ad8d;
-            --sticker-border: #ffffff;
             --accent: #8b6e51;
         }
 
@@ -22,37 +21,33 @@
         body {
             font-family: 'Noto Sans SC', sans-serif;
             background-color: #f0e6d6;
-            /* 牛皮纸底纹 */
             background-image: radial-gradient(#d4bc9d 1px, transparent 1px);
             background-size: 20px 20px;
             color: #5d4a3a;
             padding: 20px;
-            overflow-x: hidden;
+            min-height: 100vh;
         }
 
-        header { text-align: center; margin-bottom: 30px; }
-        h1 { font-family: 'Gaegu', cursive; font-size: 3rem; color: #4a3a2e; }
-        .subtitle { font-family: 'Gaegu', cursive; font-size: 1.2rem; opacity: 0.7; }
+        header { text-align: center; margin-bottom: 20px; }
+        h1 { font-family: 'Gaegu', cursive; font-size: 2.5rem; color: #4a3a2e; }
 
-        /* 上传区域：模拟文件夹 */
+        /* 上传区 */
         .upload-zone {
             background: #fff;
-            max-width: 450px;
-            margin: 0 auto 40px;
-            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto 30px;
+            padding: 15px;
             border-radius: 8px;
-            border-left: 10px solid var(--accent);
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
-            position: relative;
+            border-bottom: 5px solid var(--accent);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
-        .upload-zone input[type="text"] {
+        #drink-name {
             width: 100%;
-            padding: 10px;
-            border: 1px dashed var(--accent);
-            border-radius: 4px;
+            padding: 8px;
             margin-bottom: 10px;
-            outline: none;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
 
         .btn-upload {
@@ -60,158 +55,96 @@
             background: var(--accent);
             color: white;
             text-align: center;
-            padding: 12px;
+            padding: 10px;
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
-            transition: 0.3s;
         }
 
-        .btn-upload:hover { filter: brightness(1.2); }
         #file-input { display: none; }
 
-        /* 纸箱设计 */
+        /* 纸箱容器 */
         .cardboard-box {
             background: var(--box-inner);
-            max-width: 1000px;
-            margin: 40px auto;
-            border: 12px solid var(--paper-dark);
+            max-width: 900px;
+            margin: 0 auto;
+            border: 10px solid var(--paper-dark);
             border-radius: 4px;
-            padding: 50px 30px;
+            padding: 40px 15px;
             position: relative;
-            box-shadow: inset 0 0 100px rgba(0,0,0,0.2), 0 20px 40px rgba(0,0,0,0.15);
-            min-height: 500px;
-        }
-
-        /* 模拟纸箱盖子 */
-        .cardboard-box::before, .cardboard-box::after {
-            content: '';
-            position: absolute;
-            background: var(--paper-light);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            z-index: 1;
-        }
-        /* 左盖子 */
-        .cardboard-box::before {
-            top: -12px; left: -80px; width: 80px; height: 100.5%;
-            transform-origin: right;
-            transform: perspective(600px) rotateY(20deg);
-            border: 2px solid var(--paper-dark);
-        }
-        /* 右盖子 */
-        .cardboard-box::after {
-            top: -12px; right: -80px; width: 80px; height: 100.5%;
-            transform-origin: left;
-            transform: perspective(600px) rotateY(-20deg);
-            border: 2px solid var(--paper-dark);
+            box-shadow: inset 0 0 80px rgba(0,0,0,0.2);
+            min-height: 450px;
         }
 
         #sticker-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 40px;
-            position: relative;
-            z-index: 2;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 25px;
         }
 
-        /* 核心：贴纸外观设计 */
+        /* 贴纸样式 */
         .sticker-item {
-            position: relative;
-            cursor: grab;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex;
             flex-direction: column;
             align-items: center;
+            position: relative;
+            cursor: grab;
+            transition: transform 0.2s;
         }
 
-        .sticker-item:active { cursor: grabbing; }
-
-        /* 贴纸图片层 */
         .sticker-wrapper {
             position: relative;
-            /* 关键滤镜：模拟厚白边 */
+            /* 关键：模拟白边的多重投影 */
             filter: 
-                drop-shadow(4px 0 0 white) 
-                drop-shadow(-4px 0 0 white) 
-                drop-shadow(0 4px 0 white) 
-                drop-shadow(0 -4px 0 white)
-                drop-shadow(5px 8px 10px rgba(0,0,0,0.2));
-            margin-bottom: 15px;
+                drop-shadow(3px 0 0 white) 
+                drop-shadow(-3px 0 0 white) 
+                drop-shadow(0 3px 0 white) 
+                drop-shadow(0 -3px 0 white)
+                drop-shadow(2px 4px 6px rgba(0,0,0,0.2));
+            margin-bottom: 10px;
         }
 
         .sticker-img {
-            width: 160px;
-            height: 160px;
+            width: 130px;
+            height: 130px;
             object-fit: cover;
-            /* 模拟不规则手工剪裁 */
-            clip-path: polygon(
-                10% 0%, 90% 5%, 100% 15%, 95% 85%, 
-                85% 100%, 15% 95%, 0% 80%, 5% 15%
-            );
             background: #eee;
             display: block;
+            /* 默认剪裁路径 */
+            clip-path: polygon(5% 2%, 96% 0%, 100% 95%, 2% 100%);
         }
 
-        /* 饮品名字：手写标签感 */
         .sticker-label {
             font-family: 'Gaegu', cursive;
-            background: rgba(255,255,255,0.9);
-            padding: 2px 12px;
-            border-radius: 20px;
-            font-size: 1.2rem;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
-            transform: rotate(-2deg);
-            border: 1px solid #eee;
-        }
-
-        /* 色卡：小圆点贴纸 */
-        .palette-dots {
-            display: flex;
-            gap: 5px;
-            margin-top: 8px;
-        }
-        .dot {
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+            background: white;
+            padding: 1px 8px;
+            border-radius: 4px;
+            font-size: 1rem;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
         }
 
         .del-btn {
             position: absolute;
-            top: -10px;
-            right: 0;
-            background: #ff4757;
-            color: white;
-            border: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: none;
-            z-index: 10;
+            top: -5px; right: 0;
+            background: #ff4757; color: white;
+            border: none; width: 20px; height: 20px;
+            border-radius: 50%; cursor: pointer;
+            z-index: 10; display: none;
         }
         .sticker-item:hover .del-btn { display: block; }
 
-        .sortable-ghost { opacity: 0.2; transform: scale(0.8); }
-
-        @media (max-width: 600px) {
-            .cardboard-box::before, .cardboard-box::after { display: none; }
-            .cardboard-box { margin: 10px; padding: 20px; border-width: 6px; }
-        }
+        .sortable-ghost { opacity: 0; }
     </style>
 </head>
 <body>
 
     <header>
         <h1>我的饮料贴纸库</h1>
-        <p class="subtitle">Drink Sticker Archive</p>
     </header>
 
     <div class="upload-zone">
-        <input type="text" id="drink-name" placeholder="为这枚贴纸命名...">
-        <label for="file-input" class="btn-upload">✨ 制作我的贴纸</label>
+        <input type="text" id="drink-name" placeholder="给贴纸起个名字...">
+        <label for="file-input" class="btn-upload">📸 制作贴纸</label>
         <input type="file" id="file-input" accept="image/*">
     </div>
 
@@ -225,7 +158,8 @@
         const nameInput = document.getElementById('drink-name');
         const colorThief = new ColorThief();
 
-        let stickerData = JSON.parse(localStorage.getItem('drink_stickers_v3') || '[]');
+        // 使用新键名避开旧缓存空间
+        let stickerData = JSON.parse(localStorage.getItem('drink_stickers_v4_stable') || '[]');
 
         render();
 
@@ -233,61 +167,55 @@
             const file = e.target.files[0];
             if (!file) return;
 
+            console.log("文件已选择，开始处理...");
+
             const reader = new FileReader();
             reader.onload = function(event) {
                 const img = new Image();
                 img.src = event.target.result;
                 img.onload = function() {
-                    // 1. 压缩图片
+                    console.log("图片加载成功，开始压缩...");
+                    
                     const canvas = document.createElement('canvas');
-                    const size = 400; // 贴纸质量上限
+                    const size = 300; // 进一步缩小尺寸以保证存储成功
                     canvas.width = size;
                     canvas.height = size;
                     const ctx = canvas.getContext('2d');
                     
-                    // 居中裁剪成正方形绘制到 canvas
                     const min = Math.min(img.width, img.height);
                     ctx.drawImage(img, (img.width-min)/2, (img.height-min)/2, min, min, 0, 0, size, size);
                     
-                    const base64 = canvas.toDataURL('image/webp', 0.8);
+                    // 使用 jpeg 并降低质量来极大地压缩体积
+                    const base64 = canvas.toDataURL('image/jpeg', 0.6);
 
-                    // 2. 提取颜色
-                    let colors = ["#ffffff"];
+                    // 颜色提取加防护
+                    let colors = ["#d4bc9d"];
                     try {
-                        colors = colorThief.getPalette(img, 3).map(rgb => `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`);
-                    } catch(e) {}
+                        const palette = colorThief.getPalette(img, 2);
+                        colors = palette.map(rgb => `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`);
+                    } catch(err) {
+                        console.warn("颜色提取跳过:", err);
+                    }
 
-                    // 3. 生成随机形状和旋转
-                    const randomPath = generateRandomClipPath();
-                    
-                    stickerData.unshift({
+                    const newSticker = {
                         id: Date.now(),
-                        name: nameInput.value || "好喝的",
+                        name: nameInput.value || "未命名",
                         img: base64,
                         colors: colors,
-                        rotate: Math.random() * 14 - 7,
-                        path: randomPath
-                    });
+                        rotate: Math.random() * 10 - 5,
+                        path: `polygon(${Math.random()*10}% ${Math.random()*10}%, ${90+Math.random()*10}% ${Math.random()*10}%, ${90+Math.random()*10}% ${90+Math.random()*10}%, ${Math.random()*10}% ${90+Math.random()*10}%)`
+                    };
 
-                    save();
-                    render();
-                    nameInput.value = '';
+                    stickerData.unshift(newSticker);
+                    if(save()) {
+                        render();
+                        nameInput.value = '';
+                        console.log("贴纸添加成功！");
+                    }
                 };
             };
             reader.readAsDataURL(file);
         });
-
-        // 核心函数：生成不规则的剪裁路径，让贴纸更真实
-        function generateRandomClipPath() {
-            const v = () => 10 + Math.random() * 80; 
-            // 返回一个稍微扭曲的多边形
-            return `polygon(
-                ${Math.random()*15}% ${Math.random()*15}%, 
-                ${85 + Math.random()*15}% ${Math.random()*15}%, 
-                ${85 + Math.random()*15}% ${85 + Math.random()*15}%, 
-                ${Math.random()*15}% ${85 + Math.random()*15}%
-            )`;
-        }
 
         function render() {
             container.innerHTML = '';
@@ -297,15 +225,12 @@
                 div.dataset.id = item.id;
                 div.style.transform = `rotate(${item.rotate}deg)`;
 
-                const dots = item.colors.map(c => `<div class="dot" style="background:${c}"></div>`).join('');
-
                 div.innerHTML = `
                     <button class="del-btn" onclick="remove(${item.id})">✕</button>
                     <div class="sticker-wrapper">
-                        <img src="${item.img}" class="sticker-img" style="clip-path: ${item.path || 'none'}">
+                        <img src="${item.img}" class="sticker-img" style="clip-path: ${item.path}">
                     </div>
                     <div class="sticker-label">${item.name}</div>
-                    <div class="palette-dots">${dots}</div>
                 `;
                 container.appendChild(div);
             });
@@ -318,11 +243,19 @@
         }
 
         function save() {
-            localStorage.setItem('drink_stickers_v3', JSON.stringify(stickerData));
+            try {
+                localStorage.setItem('drink_stickers_v4_stable', JSON.stringify(stickerData));
+                return true;
+            } catch (e) {
+                console.error("存储失败:", e);
+                alert("存储空间不足！请删除一些旧贴纸。");
+                return false;
+            }
         }
 
+        // 初始化拖拽
         new Sortable(container, {
-            animation: 350,
+            animation: 150,
             ghostClass: 'sortable-ghost',
             onEnd: () => {
                 const ids = [...container.querySelectorAll('.sticker-item')].map(el => parseInt(el.dataset.id));
