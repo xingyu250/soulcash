@@ -3,67 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>微醺时刻 | 我的私藏饮品志</title>
-    <!-- 引入字体和图标 -->
-    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
-    <!-- 引入 SortableJS 用于拖拽 -->
+    <title>我的饮料贴纸库 | My Cozy Drink Sticker Collection</title>
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Gaegu:wght@400;700&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-    <!-- 引入 ColorThief 用于提取颜色 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
 
     <style>
         :root {
-            --bg-color: #fcf8f2;
-            --card-bg: rgba(255, 255, 255, 0.8);
-            --accent-color: #d4a373;
+            /* 新的颜色变量：牛皮纸色系和贴纸白 */
+            --bg-paper: #e6dac8; /* 牛皮纸暖色背景 */
+            --box-inner-bg: #d8c3a5; /* 纸箱内部颜色 */
+            --box-border: #8b6e51; /* 纸箱边框和胶带颜色 */
+            --sticker-bg: #ffffff; /* 贴纸白 */
             --text-color: #5b4d42;
-            --shadow: 0 8px 30px rgba(0,0,0,0.05);
+            --accent-color: #d4a373;
+            --shadow-sticker: 2px 2px 6px rgba(0,0,0,0.2), -1px -1px 2px rgba(0,0,0,0.1);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Noto Sans SC', sans-serif;
-            background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(212, 163, 115, 0.05) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(212, 163, 115, 0.08) 0%, transparent 20%);
+            background-color: var(--bg-paper);
+            /* 牛皮纸纹理 */
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48ZyBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM4YjZlNTEiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTAgMGg0MHY0MEgwVjB6bTIwIDIwaDIwdjIwSDIWMjB6TTAgMjBoMjB2MjBIMFYyMHoyMCAwaDIwdjIwSDIwVjB6Ii8+PC9nPjwvZz48L3N2Zz4=');
             color: var(--text-color);
             min-height: 100vh;
-            padding: 20px;
+            padding: 20px 40px;
             line-height: 1.6;
+            position: relative;
         }
 
         header {
             text-align: center;
-            padding: 40px 0;
+            padding: 30px 0 50px;
+            position: relative;
+            z-index: 2;
         }
 
         h1 {
-            font-family: 'ZCOOL+XiaoWei', serif;
-            font-size: 2.5rem;
+            font-family: 'Gaegu', 'ZCOOL XiaoWei', serif;
+            font-size: 3rem;
             color: #4a3a2e;
-            margin-bottom: 10px;
-            letter-spacing: 2px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
         }
 
         .subtitle {
-            font-size: 0.9rem;
+            font-size: 1rem;
             color: #a08d7c;
             text-transform: uppercase;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
+            font-family: 'Gaegu', cursive;
         }
 
-        /* 表单区域 */
+        /* 输入区域（剪贴板样式） */
         .input-section {
-            max-width: 500px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            max-width: 450px;
             margin: 0 auto 50px;
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            padding: 25px;
-            border-radius: 24px;
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(255,255,255,0.5);
+            position: relative;
+            z-index: 10;
+        }
+        /* 模拟剪贴板夹子 */
+        .input-section::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 25px;
+            background: var(--box-border);
+            border-radius: 6px 6px 0 0;
+            border: 2px solid #fff;
         }
 
         .input-group {
@@ -73,12 +91,13 @@
         }
 
         input[type="text"] {
-            border: none;
-            background: rgba(212, 163, 115, 0.1);
+            border: 2px solid var(--accent-color);
+            background: #fff;
             padding: 12px 20px;
             border-radius: 12px;
             outline: none;
             color: var(--text-color);
+            font-size: 0.95rem;
         }
 
         .file-upload-btn {
@@ -99,76 +118,120 @@
 
         #file-input { display: none; }
 
+        /* 纸箱容器 */
+        .box-container {
+            background-color: var(--box-inner-bg);
+            border: 8px solid var(--box-border);
+            border-radius: 16px;
+            padding: 30px;
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+
+        /* 模拟纸箱边缘和胶带装饰 */
+        .box-container::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 100px;
+            height: 40px;
+            background: var(--box-border);
+            opacity: 0.7;
+            transform: rotate(-10deg);
+            clip-path: polygon(0 0, 100% 10%, 90% 100%, 10% 90%);
+        }
+
         /* 列表区域 */
         #drink-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-            max-width: 1200px;
-            margin: 0 auto;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 30px;
         }
 
+        /* 贴纸卡片样式（关键修改） */
         .drink-card {
-            background: var(--card-bg);
-            border-radius: 24px;
+            background: var(--sticker-bg);
+            /* 厚白色贴纸边框 */
+            border: 10px solid white;
+            border-radius: 6px; /* 极小圆角 */
             overflow: hidden;
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-sticker);
             transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1);
             cursor: grab;
             position: relative;
-            border: 1px solid transparent;
+            /* 模拟裁剪不规则边缘：可以使用稍微不规则的多边形遮罩，但这很复杂且很难贴合图片比例 */
+            /* 妥协方案：使用厚边框和 contain 模式，让图片展示在白底上，使其看起来像贴在白纸上的饮品 */
         }
 
-        .drink-card:active { cursor: grabbing; }
+        .drink-card:active { cursor: grabbing; z-index: 10; }
 
+        /* 饮品图片区域 */
         .drink-card img {
             width: 100%;
-            height: 220px;
-            object-fit: cover;
+            height: 200px; /* 固定高度，可能导致图片拉伸或裁剪，但保持统一贴纸大小 */
+            object-fit: contain; /* 关键：保持图片比例，居中在白色边框内展示 */
+            background: #fcf8f2; /* 图片内部浅色背景 */
             display: block;
         }
 
         .card-content {
-            padding: 20px;
+            padding: 15px;
+            text-align: center;
         }
 
         .drink-name {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 500;
+            font-family: 'Gaegu', cursive;
             margin-bottom: 15px;
             display: block;
+            border-bottom: 1px dashed var(--accent-color);
+            padding-bottom: 5px;
         }
 
-        /* 色卡展示 */
+        /* 色卡展示（改为圆形 dot stickers） */
         .color-palette {
             display: flex;
             gap: 10px;
+            justify-content: center;
         }
 
         .color-swatch {
-            flex: 1;
-            height: 45px;
-            border-radius: 8px;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: var(--shadow-sticker);
+            position: relative;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
-            color: white;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-            position: relative;
-            transition: flex 0.3s;
         }
         
-        .color-swatch:hover { flex: 1.5; }
+        .color-swatch span {
+            font-size: 8px;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none; /* 隐藏代码，保持干净 */
+        }
+        
+        .color-swatch:hover span { display: block; }
 
         /* 删除按钮 */
         .delete-btn {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 30px;
-            height: 30px;
+            top: 5px;
+            right: 5px;
+            width: 25px;
+            height: 25px;
             border-radius: 50%;
             background: rgba(255,255,255,0.8);
             border: none;
@@ -179,45 +242,57 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 16px;
+            z-index: 5;
         }
 
         .drink-card:hover .delete-btn { opacity: 1; }
 
+        /* 装饰图标样式 */
+        .decor-icon {
+            position: fixed;
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 0;
+        }
+
         /* 拖拽中的样式 */
         .sortable-ghost {
             opacity: 0.3;
-            transform: scale(0.9);
+            transform: rotate(0deg) scale(0.9);
         }
 
         .sortable-chosen {
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            border: 1px solid var(--accent-color);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            border: 10px solid white; /* 保持厚边框 */
         }
 
         @media (max-width: 600px) {
-            h1 { font-size: 1.8rem; }
-            #drink-list { grid-template-columns: 1fr; }
+            h1 { font-size: 2.2rem; }
+            #drink-list { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px;}
+            .box-container { padding: 20px; }
+            .drink-card img { height: 180px; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>微醺时刻</h1>
-        <div class="subtitle">Personal Drink Collection</div>
+    <svg class="decor-icon" style="top:10%; left:5%;" width="60" height="60" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#d4a373"/><path d="M50 10L50 90" stroke="#fff" stroke-width="5"/><circle cx="50" cy="50" r="10" fill="#fff"/></svg> <svg class="decor-icon" style="bottom:15%; right:8%;" width="50" height="50" viewBox="0 0 100 100"><path d="M10 10 C 20 40, 60 40, 90 10" stroke="#bc8a5f" stroke-width="8" fill="none"/><path d="M10 30 L 90 30 M10 50 L 90 50 M10 70 L 90 70" stroke="#bc8a5f" stroke-width="4"/></svg> <header>
+        <h1>我的饮料贴纸库</h1>
+        <div class="subtitle">My Cozy Drink Sticker Collection</div>
     </header>
 
     <section class="input-section">
         <div class="input-group">
-            <input type="text" id="drink-name" placeholder="给这款饮品起个好听的名字..." maxlength="15">
-            <label for="file-input" class="file-upload-btn">上传饮品照片</label>
+            <input type="text" id="drink-name" placeholder="在这里添加你的新饮料贴纸..." maxlength="15">
+            <label for="file-input" class="file-upload-btn">上传饮品，制作贴纸</label>
             <input type="file" id="file-input" accept="image/*">
         </div>
     </section>
 
-    <main id="drink-list">
-        <!-- 卡片动态插入到这里 -->
+    <main class="box-container">
+        <div id="drink-list">
+            </div>
     </main>
 
     <script>
@@ -234,7 +309,7 @@
         // 图片处理与添加
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
-            const name = nameInput.value.trim() || "未命名饮品";
+            const name = nameInput.value.trim() || "未命名贴纸";
             
             if (!file) return;
 
@@ -294,12 +369,16 @@
                         </div>
                     </div>
                 `;
+                
+                // 在渲染时为贴纸添加随机旋转
+                card.style.transform = `rotate(${Math.random() * 6 - 3}deg)`;
+                
                 drinkList.appendChild(card);
             });
         }
 
         function deleteDrink(id) {
-            if(confirm('确定要移除这款饮品吗？')) {
+            if(confirm('确定要从贴纸库移出这款贴纸吗？')) {
                 drinks = drinks.filter(d => d.id !== id);
                 saveAndRender();
             }
@@ -310,7 +389,7 @@
             renderDrinks();
         }
 
-        // 初始化拖拽排序
+        // 初始化拖拽排序：确保排序体验同样丝滑
         new Sortable(drinkList, {
             animation: 400,
             ghostClass: 'sortable-ghost',
